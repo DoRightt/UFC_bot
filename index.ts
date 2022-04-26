@@ -4,13 +4,13 @@ import { States } from "./models/states.enum";
 import { getFighterStat, parseFighterStat, parseNextTournament } from './handlers/main';
 
 
+
 process.env.NTBA_FIX_319 = String(1);
 // require("dotenv").config();
 // const handlers = require('./handlers/main.ts');
 const TelegramBot = require('node-telegram-bot-api');
-
-const token = '5232414759:AAG4WVXhBuz7UqID1OAYi9PA2tn7LDXDKd0';
-const bot = new TelegramBot(token, {polling: true});
+const { TELEGRAM_TOKEN } = process.env;
+const bot = new TelegramBot(TELEGRAM_TOKEN, {polling: true});
 
 let state = States.INITIAL;
 
