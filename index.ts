@@ -1,13 +1,10 @@
 import dotenv from 'dotenv'
 dotenv.config();
 import { States } from "./models/states.enum";
-import { getFighterStat, parseFighterStat, parseNextTournament } from './handlers/main';
-
-
+import { getFighterStat, parseFighterStat, parseNextTournament, parseTournamentSchedule } from './handlers/main';
 
 process.env.NTBA_FIX_319 = String(1);
-// require("dotenv").config();
-// const handlers = require('./handlers/main.ts');
+
 const TelegramBot = require('node-telegram-bot-api');
 const { TELEGRAM_TOKEN } = process.env;
 const bot = new TelegramBot(TELEGRAM_TOKEN, {polling: true});
@@ -49,8 +46,13 @@ bot.on('callback_query', async (query) => {
             break;
         case 'nextEvent':
             state = 1;
-            const message = await parseNextTournament();
-            bot.sendMessage(chatId, message);
+            const tournamentMessage = await parseNextTournament();
+            bot.sendMessage(chatId, tournamentMessage);
+            break;
+        case 'eventSchedule':
+            state = 2;
+            const tournamentsMessage = await parseTournamentSchedule();
+            bot.sendMessage(chatId, tournamentsMessage);
             break;
     }
 

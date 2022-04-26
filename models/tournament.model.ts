@@ -1,3 +1,5 @@
+import {Fight} from "./fight.model";
+
 export class Tournament {
     EventId: number;
     LeagueId: number;
@@ -8,4 +10,5 @@ export class Tournament {
     DateTime: Date;
     Status: string;
     Active: boolean;
+    Fights: Fight[];
 }
