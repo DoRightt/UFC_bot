@@ -1,0 +1,7 @@
+export enum States {
+    INITIAL,
+    NEXT_TOURNAMENT,
+    TOURNAMENT_SCHEDULE,
+    FIGHTER_STAT,
+    TOURNAMENT_BET
+}
