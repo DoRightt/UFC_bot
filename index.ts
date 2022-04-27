@@ -1,7 +1,8 @@
 import dotenv from 'dotenv'
+import {States} from "./models/states.enum";
+import { getFighterStat, parseFighterStat, parseNextTournament, parseTournamentSchedule, getBetKeyboard } from './handlers/main';
+
 dotenv.config();
-import { States } from "./models/states.enum";
-import { getFighterStat, parseFighterStat, parseNextTournament, parseTournamentSchedule } from './handlers/main';
 
 process.env.NTBA_FIX_319 = String(1);
 
@@ -15,20 +16,20 @@ bot.on('message', (msg) => {
    const chatId = msg.chat.id;
 
     switch (state) {
-        case 0:
+        case States.INITIAL:
             bot.sendMessage(chatId, 'Привет, что хочешь найти?', {
                 reply_markup: {
                     inline_keyboard: keyboard
                 }
             });
             break;
-        case 3:
+        case States.FIGHTER_STAT:
             const fighterName = msg.text;
             const fighter = getFighterStat(fighterName);
 
             if (fighter) {
                 bot.sendMessage(chatId, parseFighterStat(fighter))
-                state = 0;
+                state = States.INITIAL;
             } else {
                 bot.sendMessage(chatId, 'Боец не найден, проверь верно ли указано имя.')
             }
@@ -41,19 +42,27 @@ bot.on('callback_query', async (query) => {
 
     switch(option) {
         case 'fighterStat':
-            state = 3;
+            state = States.FIGHTER_STAT;
             bot.sendMessage(chatId, 'Введи имя бойца');
             break;
         case 'nextEvent':
-            state = 1;
+            state = States.NEXT_TOURNAMENT;
             const tournamentMessage = await parseNextTournament();
             bot.sendMessage(chatId, tournamentMessage);
             break;
         case 'eventSchedule':
-            state = 2;
+            state = States.TOURNAMENT_SCHEDULE;
             const tournamentsMessage = await parseTournamentSchedule();
             bot.sendMessage(chatId, tournamentsMessage);
             break;
+        case 'tournamentBet':
+            state = States.TOURNAMENT_BET;
+            const kb = await getBetKeyboard();
+            bot.sendMessage(chatId, 'Выбери бойца:', {
+                reply_markup: {
+                    inline_keyboard: kb
+                }
+            })
     }
 
     // if (msg) {
@@ -99,4 +108,4 @@ const keyboard = [
             callback_data: 'tournamentBet'
         }
     ],
-]
+];

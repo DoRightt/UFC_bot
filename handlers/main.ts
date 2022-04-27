@@ -1,6 +1,8 @@
+import dotenv from "dotenv";
+dotenv.config();
 import { Fighter } from "../models/fighter.model";
 import { Tournament } from "../models/tournament.model";
-import {Fight, IFight} from "../models/fight.model";
+import { Fight, IFight } from "../models/fight.model";
 
 const https = require('https');
 const Fighters = require('../fighters.js');
@@ -128,19 +130,19 @@ function compareNames(a, b) {
     return a.toLowerCase() === b.toLowerCase();
 }
 
-async function getSeasonTournamentData(league, season): Promise<any> {
+const getSeasonTournamentData = async (league, season): Promise<any> => {
     const url = `https://api.sportsdata.io/v3/mma/scores/json/Schedule/${league}/${season}?key=${API_KEY}`;
     const seasonTournaments = await doRequest(url);
     return seasonTournaments;
 }
 
-async function getTournamentData(id: number) {
-    const url = `https://api.sportsdata.io/v3/mma/scores/json/Event/${id}?key=${API_KEY}`
+const getTournamentData = async (id: number): Promise<Tournament> => {
+    const url = `https://api.sportsdata.io/v3/mma/scores/json/Event/${id}?key=${API_KEY}`;
     const data = await doRequest(url);
     return data;
 }
 
-async function doRequest(url): Promise<any> {
+const doRequest = async (url): Promise<any> => {
     return new Promise((resolve, reject) => {
         const req = https.get(url, (res) => {
             res.setEncoding('utf8');
@@ -163,13 +165,15 @@ async function doRequest(url): Promise<any> {
     });
 }
 
-function getFinishedTournaments(tournaments: Tournament[]) {
+const getFinishedTournaments = (tournaments: Tournament[]): Tournament[] => {
     const finishedTournaments = tournaments.filter(event => {
         return event.Status === 'Final';
     })
+
+    return finishedTournaments;
 }
 
-function getFutureTournaments(tournaments: Tournament[]) {
+const getFutureTournaments = (tournaments: Tournament[]): Tournament[] => {
     const futureTournaments = tournaments.filter(event => {
         return event.Status !== 'Final';
     })
@@ -177,4 +181,24 @@ function getFutureTournaments(tournaments: Tournament[]) {
     return futureTournaments;
 }
 
-export { getFighterStat, parseFighterStat, parseNextTournament, parseTournamentSchedule }
+const getBetKeyboard = async (): Promise<any> => {
+    const nextTournamentId = await getNextTournamentId();
+    const tournamentData = await getTournamentData(nextTournamentId);
+    const fights = tournamentData.Fights.map(getFightFighters);
+    const fightKeyboard = fights.map(fight => {
+        return [
+            {
+                text: getFighterFullName(fight.red),
+                callback_data: `${fight.red.FighterId}`
+            },
+            {
+                text: getFighterFullName(fight.blue),
+                callback_data: `${fight.blue.FighterId}`
+            }
+        ]
+    });
+
+    return fightKeyboard;
+}
+
+export { getFighterStat, parseFighterStat, parseNextTournament, parseTournamentSchedule, getBetKeyboard }
