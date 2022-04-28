@@ -15,6 +15,7 @@ export class Fight {
 }
 
 export interface IFight {
+    fightId?: number;
     red: Fighter;
     blue: Fighter;
 }

@@ -33,7 +33,7 @@ const parseFighterStat = (fighter: Fighter): string => {
 
     return stat
 }
-const parseNextTournament = async () => {
+const parseNextTournament = async (): Promise<string> => {
     const nextTournamentId = await getNextTournamentId();
     const tournamentData = await getTournamentData(nextTournamentId);
     const fights = tournamentData.Fights.map(getFightFighters);
@@ -51,7 +51,7 @@ const parseNextTournament = async () => {
     return result;
 }
 
-const parseEventDate = (date: Date) => {
+const parseEventDate = (date: Date): string => {
     const dayNames = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота']
     const monthNames = ['Января', 'Февраля', 'Марта', 'Апреля', 'Мая', 'Июня',
         'Июля', 'Августа', 'Сентября', 'Октября', 'Ноября', 'Декабря'
@@ -67,6 +67,7 @@ const parseEventDate = (date: Date) => {
 
 const getFightFighters = (fight: Fight): IFight => {
     return {
+        fightId: fight.FightId,
         red: fight.Fighters[0],
         blue: fight.Fighters[1]
     }
@@ -91,7 +92,7 @@ const parseTournamentFights = (fights: IFight[]): string => {
     return fightsAsStrings.join('\n\t');
 }
 
-const parseTournamentSchedule = async () => {
+const parseTournamentSchedule = async (): Promise<string> => {
     const tournaments = await getSeasonTournamentData(league, currentSeason);
     const futureTournaments = getFutureTournaments(tournaments);
     const tournamentsStrings = futureTournaments.map(parseTournament);
@@ -126,7 +127,7 @@ const getNextTournamentId = async (): Promise<number> => {
     return nextTournament.EventId;
 }
 
-function compareNames(a, b) {
+const compareNames = (a, b): boolean => {
     return a.toLowerCase() === b.toLowerCase();
 }
 
@@ -181,6 +182,10 @@ const getFutureTournaments = (tournaments: Tournament[]): Tournament[] => {
     return futureTournaments;
 }
 
+const getFightName = (fight: IFight): string => {
+    return `${getFighterFullName(fight.red)} Vs. ${getFighterFullName(fight.blue)}`
+}
+
 const getBetKeyboard = async (): Promise<any> => {
     const nextTournamentId = await getNextTournamentId();
     const tournamentData = await getTournamentData(nextTournamentId);
@@ -189,11 +194,17 @@ const getBetKeyboard = async (): Promise<any> => {
         return [
             {
                 text: getFighterFullName(fight.red),
-                callback_data: `${fight.red.FighterId}`
+                callback_data: 'bet' + JSON.stringify({
+                    fId: fight.fightId,
+                    bet: fight.red.FighterId,
+                })
             },
             {
                 text: getFighterFullName(fight.blue),
-                callback_data: `${fight.blue.FighterId}`
+                callback_data: 'bet' + JSON.stringify({
+                    fId: fight.fightId,
+                    bet: fight.blue.FighterId,
+                })
             }
         ]
     });
@@ -201,4 +212,21 @@ const getBetKeyboard = async (): Promise<any> => {
     return fightKeyboard;
 }
 
-export { getFighterStat, parseFighterStat, parseNextTournament, parseTournamentSchedule, getBetKeyboard }
+const getFighterById = (id: number): Fighter => {
+    const fighter = Fighters.find(fighter => fighter.FighterId === id);
+
+    return fighter;
+}
+
+const getFightById = async (id: number): Promise<Fight> => {
+    const url = `https://api.sportsdata.io/v3/mma/stats/json/Fight/${id}?key=${API_KEY}`;
+    const fight = await doRequest(url);
+
+    return fight;
+}
+
+const betHandler = (options) => {
+    console.log(options, 'is bet!!!!');
+}
+
+export { getFighterStat, parseFighterStat, parseNextTournament, parseTournamentSchedule, getBetKeyboard, betHandler }

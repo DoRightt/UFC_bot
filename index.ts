@@ -1,6 +1,13 @@
 import dotenv from 'dotenv'
 import {States} from "./models/states.enum";
-import { getFighterStat, parseFighterStat, parseNextTournament, parseTournamentSchedule, getBetKeyboard } from './handlers/main';
+import {
+    getFighterStat,
+    parseFighterStat,
+    parseNextTournament,
+    parseTournamentSchedule,
+    getBetKeyboard,
+    betHandler
+} from './handlers/main';
 
 dotenv.config();
 
@@ -39,6 +46,13 @@ bot.on('message', (msg) => {
 bot.on('callback_query', async (query) => {
     const chatId = query.message.chat.id;
     const option = query.data;
+    const isBet = option.substr(0, 3) === 'bet';
+
+    if (isBet) {
+        const data = JSON.parse(option.substring(3));
+        betHandler(data);
+        return;
+    }
 
     switch(option) {
         case 'fighterStat':
@@ -85,8 +99,8 @@ bot.on('callback_query', async (query) => {
 const keyboard = [
     [
         {
-            text: 'Следующий турнир', // текст на кнопке
-            callback_data: 'nextEvent' // данные для обработчика событий
+            text: 'Следующий турнир',
+            callback_data: 'nextEvent'
         },
     ],
     [
