@@ -1,32 +1,58 @@
 import dotenv from 'dotenv'
-import {States} from "./models/states.enum";
+import { States } from "./models/states.enum";
+import dbPath from './environment/db';
 import {
+    betHandler,
     getFighterStat,
+    getNextEventBets,
+    getSeasonScores,
     parseFighterStat,
     parseNextTournament,
     parseTournamentSchedule,
-    getBetKeyboard,
-    betHandler
+    setStateByCommand
 } from './handlers/main';
+import { getKeyboard, KeyboardTypes } from "./handlers/keyboards";
+import { CallbackDataType } from "./models/callback-data-type.enum";
+import { Commands } from "./models/commands.enum";
 
 dotenv.config();
 
 process.env.NTBA_FIX_319 = String(1);
 
+const mongoose = require('mongoose');
 const TelegramBot = require('node-telegram-bot-api');
-const { TELEGRAM_TOKEN } = process.env;
+const { TELEGRAM_TOKEN, ANTON_CHAT_ID, ANDREY_CHAT_ID  } = process.env;
 const bot = new TelegramBot(TELEGRAM_TOKEN, {polling: true});
+const url = dbPath;
 
 let state = States.INITIAL;
 
-bot.on('message', (msg) => {
-   const chatId = msg.chat.id;
+const start = (): void => {
+    try {
+        mongoose.connect(url, { useNewUrlParser: true, useFindAndModify: false, useUnifiedTopology: true });
+    } catch(err) {
+        console.log(err);
+    }
+    const db = mongoose.connection;
+    db.on("error", console.error.bind(console, "connection error: "));
+    db.once("open", function () {
+        console.log("Connected successfully");
+    });
+}
 
+start();
+
+bot.on('message', async (msg) => {
+    const chatId = msg.chat.id;
+    const text = msg.text.toLowerCase();
+
+    state = setStateByCommand(text) || state;
+    console.log(state, 'state our')
     switch (state) {
         case States.INITIAL:
-            bot.sendMessage(chatId, 'Привет, что хочешь найти?', {
+            bot.sendMessage(chatId, `Привет, доступные действия:`, {
                 reply_markup: {
-                    inline_keyboard: keyboard
+                    inline_keyboard: getKeyboard(KeyboardTypes.DEFAULT_KEYBOARD)
                 }
             });
             break;
@@ -40,18 +66,29 @@ bot.on('message', (msg) => {
             } else {
                 bot.sendMessage(chatId, 'Боец не найден, проверь верно ли указано имя.')
             }
+            break;
     }
 });
 
 bot.on('callback_query', async (query) => {
     const chatId = query.message.chat.id;
     const option = query.data;
-    const isBet = option.substr(0, 3) === 'bet';
+    const callBackDataType = Number(option[0]);
 
-    if (isBet) {
-        const data = JSON.parse(option.substring(3));
-        betHandler(data);
-        return;
+    console.log(option, 'option')
+
+    switch (callBackDataType) {
+        case CallbackDataType.BET:
+            const betData = JSON.parse(option.substring(1));
+            betHandler(betData, chatId).then(res => {
+                const opponentChatId = Number(chatId) === Number(ANTON_CHAT_ID) ? ANDREY_CHAT_ID : ANTON_CHAT_ID;
+                const userName = Number(chatId) === Number(ANTON_CHAT_ID) ? 'Антон' : 'Андрей';
+                bot.sendMessage(chatId, res.mainMessage);
+                if (res.opponentMessage) {
+                    const message = `${userName} ${res.opponentMessage}`;
+                    bot.sendMessage(Number(opponentChatId), message);
+                }
+            });
     }
 
     switch(option) {
@@ -71,55 +108,22 @@ bot.on('callback_query', async (query) => {
             break;
         case 'tournamentBet':
             state = States.TOURNAMENT_BET;
-            const kb = await getBetKeyboard();
+            const kb = await getKeyboard(KeyboardTypes.BET_KEYBOARD);
             bot.sendMessage(chatId, 'Выбери бойца:', {
                 reply_markup: {
                     inline_keyboard: kb
                 }
-            })
+            });
+            break;
+        case 'nextEventBets':
+            state = States.NEXT_EVENT_BETS;
+            const nextEventMessage = await getNextEventBets();
+            bot.sendMessage(chatId, nextEventMessage);
+            break;
+        case 'showScores':
+            state = States.SCORES
+            const scoresMessage = await getSeasonScores();
+            bot.sendMessage(chatId, scoresMessage);
+            break;
     }
-
-    // if (msg) {
-    //     bot.sendMessage(chatId, msg, { // прикрутим клаву
-    //         reply_markup: {
-    //             inline_keyboard: keyboard
-    //         }
-    //     });
-    // } else {
-    //     bot.sendMessage(chatId, 'Непонятно, давай попробуем ещё раз?', {
-    //         // прикрутим клаву
-    //         reply_markup: {
-    //             inline_keyboard: keyboard
-    //         }
-    //     });
-    // }
-
 })
-
-const keyboard = [
-    [
-        {
-            text: 'Следующий турнир',
-            callback_data: 'nextEvent'
-        },
-    ],
-    [
-        {
-            text: 'Расписание турниров',
-            callback_data: 'eventSchedule',
-            // url: 'https://htmlacademy.ru/courses' //внешняя ссылка
-        }
-    ],
-    [
-        {
-            text: 'Статистика бойца',
-            callback_data: 'fighterStat'
-        }
-    ],
-    [
-        {
-            text: 'Сделать ставку на следующий турнир',
-            callback_data: 'tournamentBet'
-        }
-    ],
-];

@@ -6,4 +6,5 @@ export class Fighter {
     Losses: number;
     Draws: number;
     MoneyLine: number;
+    Winner: boolean;
 }
