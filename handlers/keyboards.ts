@@ -1,47 +1,43 @@
-import {
-    getNextTournamentId,
-    getTournamentData,
-    getFightFighters,
-    getFighterFullName, getUsers
-} from './main';
+import { getFighterFullName, getFightFighters, getNextTournamentId, getTournamentData, getUsers } from './main';
 import { CallbackDataType } from "../models/callback-data-type.enum";
+import { States } from "../models/states.enum";
 
 const getDefaultKeyboard = () => {
     return [
         [
             {
                 text: 'Следующий турнир',
-                callback_data: 'nextEvent'
+                callback_data: States.NEXT_TOURNAMENT
             },
         ],
         [
             {
                 text: 'Расписание турниров',
-                callback_data: 'eventSchedule',
+                callback_data: States.TOURNAMENT_SCHEDULE,
             }
         ],
         [
             {
                 text: 'Статистика бойца',
-                callback_data: 'fighterStat'
+                callback_data: States.FIGHTER_STAT
             }
         ],
         [
             {
                 text: 'Сделать ставку на следующий турнир',
-                callback_data: 'tournamentBet'
+                callback_data: States.TOURNAMENT_BET
             }
         ],
         [
             {
                 text: 'Показать разницу в ставках на следующий турнир',
-                callback_data: 'nextEventBets'
+                callback_data: States.NEXT_EVENT_BETS
             }
         ],
         [
             {
                 text: 'Показать счет за год',
-                callback_data: 'showScores'
+                callback_data: States.SCORES
             }
         ],
     ];

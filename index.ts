@@ -67,6 +67,10 @@ bot.on('message', async (msg) => {
                 bot.sendMessage(chatId, 'Боец не найден, проверь верно ли указано имя.')
             }
             break;
+        case States.SCORES:
+            // TODO
+            const scoresMessage = await getSeasonScores();
+            bot.sendMessage(chatId, scoresMessage);
     }
 });
 
@@ -74,8 +78,6 @@ bot.on('callback_query', async (query) => {
     const chatId = query.message.chat.id;
     const option = query.data;
     const callBackDataType = Number(option[0]);
-
-    console.log(option, 'option')
 
     switch (callBackDataType) {
         case CallbackDataType.BET:
@@ -91,22 +93,22 @@ bot.on('callback_query', async (query) => {
             });
     }
 
-    switch(option) {
-        case 'fighterStat':
+    switch(Number(option)) {
+        case States.FIGHTER_STAT:
             state = States.FIGHTER_STAT;
             bot.sendMessage(chatId, 'Введи имя бойца');
             break;
-        case 'nextEvent':
+        case States.NEXT_TOURNAMENT:
             state = States.NEXT_TOURNAMENT;
             const tournamentMessage = await parseNextTournament();
             bot.sendMessage(chatId, tournamentMessage);
             break;
-        case 'eventSchedule':
+        case States.TOURNAMENT_SCHEDULE:
             state = States.TOURNAMENT_SCHEDULE;
             const tournamentsMessage = await parseTournamentSchedule();
             bot.sendMessage(chatId, tournamentsMessage);
             break;
-        case 'tournamentBet':
+        case States.TOURNAMENT_BET:
             state = States.TOURNAMENT_BET;
             const kb = await getKeyboard(KeyboardTypes.BET_KEYBOARD);
             bot.sendMessage(chatId, 'Выбери бойца:', {
@@ -115,12 +117,12 @@ bot.on('callback_query', async (query) => {
                 }
             });
             break;
-        case 'nextEventBets':
+        case States.NEXT_EVENT_BETS:
             state = States.NEXT_EVENT_BETS;
             const nextEventMessage = await getNextEventBets();
             bot.sendMessage(chatId, nextEventMessage);
             break;
-        case 'showScores':
+        case States.SCORES:
             state = States.SCORES
             const scoresMessage = await getSeasonScores();
             bot.sendMessage(chatId, scoresMessage);

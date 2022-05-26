@@ -96,6 +96,9 @@ const parseFight = (fight: IFight): string => {
 }
 
 const parseFightWithFavoriteMark = (fight: IFight): string =>  {
+    if (!fight) {
+        return `Бой не назначен`;
+    }
     const favorite = getFavorite(fight);
 
     if (favorite.FighterId === fight.red.FighterId) {
