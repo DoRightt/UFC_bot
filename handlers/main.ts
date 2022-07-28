@@ -230,7 +230,9 @@ const betHandler = async (options, chatId) => {
     const alreadyFinished = fight.WinnerId || !fight.Active;
 
     if (alreadyFinished) {
-        return "Невозможно сделать ставку, этот бой уже завершен или отменен."
+        return {
+            mainMessage: "Невозможно сделать ставку, этот бой уже завершен или отменен."
+        }
     }
 
     const bet = {
