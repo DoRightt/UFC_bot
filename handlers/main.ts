@@ -294,7 +294,11 @@ const updateBets = async (bets) => {
         setBetResult(bet)
     })
 
+    const updatedBets = await getBets();
+
     console.log('Ставки обновлены');
+
+    return updatedBets;
 }
 
 const makeBet = async (bet: IBet): Promise<any> => {
@@ -379,12 +383,12 @@ const getSeasonScores = async (): Promise<string> => {
     const noResultBets = bets.filter(bet => !bet.isFightFinished);
     const finishedBets = noResultBets.filter(bet => Number(bet.eventId) < nextEventId);
 
-    await updateBets(finishedBets);
+    const updatedBets = await updateBets(finishedBets);
 
-    const antonBets = bets.filter(bet => bet.userId.toString() === ANTON_USER_ID);
-    const andreyBets = bets.filter(bet => bet.userId.toString() === ANDREY_USER_ID);
+    const antonBets = updatedBets.filter(bet => bet.userId.toString() === ANTON_USER_ID);
+    const andreyBets = updatedBets.filter(bet => bet.userId.toString() === ANDREY_USER_ID);
     const fightIdsOfValidBets = getFightIdsOfValidBets(antonBets, andreyBets);
-    const validBets = bets.filter(bet => fightIdsOfValidBets.includes(bet.fightId));
+    const validBets = updatedBets.filter(bet => fightIdsOfValidBets.includes(bet.fightId));
     const successValidBets = validBets.filter(bet => bet.isWin);
 
     let antonScores = defaultScores.ANTON;

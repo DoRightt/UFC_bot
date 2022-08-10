@@ -47,7 +47,7 @@ bot.on('message', async (msg) => {
     const text = msg.text.toLowerCase();
 
     state = setStateByCommand(text) || state;
-    console.log(state, 'state our')
+
     switch (state) {
         case States.INITIAL:
             bot.sendMessage(chatId, `Привет, доступные действия:`, {
@@ -68,7 +68,6 @@ bot.on('message', async (msg) => {
             }
             break;
         case States.SCORES:
-            // TODO
             const scoresMessage = await getSeasonScores();
             bot.sendMessage(chatId, scoresMessage);
     }
