@@ -15,10 +15,10 @@ export class UserModel {
     }
 }
 
-const schema = new Schema({
+const userSchema = new Schema({
     name: String,
     password: String,
     bets: Array
 }, {collection: 'users'})
 
-module.exports = model('User', schema);
+module.exports = model('User', userSchema);

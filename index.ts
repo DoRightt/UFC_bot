@@ -15,12 +15,13 @@ import { getKeyboard, KeyboardTypes } from "./handlers/keyboards";
 import { CallbackDataType } from "./models/callback-data-type.enum";
 import { Commands } from "./models/commands.enum";
 
+import mongoose from "mongoose";
+import TelegramBot from "node-telegram-bot-api"
+
 dotenv.config();
 
 process.env.NTBA_FIX_319 = String(1);
 
-const mongoose = require('mongoose');
-const TelegramBot = require('node-telegram-bot-api');
 const { TELEGRAM_TOKEN, ANTON_CHAT_ID, ANDREY_CHAT_ID  } = process.env;
 const bot = new TelegramBot(TELEGRAM_TOKEN, {polling: true});
 const url = dbPath;

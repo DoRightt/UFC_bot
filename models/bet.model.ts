@@ -16,7 +16,7 @@ export class BetModel {
     }
 }
 
-const schema = new Schema({
+const betSchema = new Schema({
     fightId: {
         type: String,
         default: '',
@@ -55,4 +55,4 @@ export interface IBet {
     bet: string;
 }
 
-module.exports = model('Bet', schema);
+module.exports = model('Bet', betSchema);

@@ -7,14 +7,14 @@ import { UserModel } from "../models/user.model";
 import { Commands } from "../models/commands.enum";
 import { States } from "../models/states.enum";
 
+import https from "https";
+import Fighters from "../fighters.js"
+
 dotenv.config();
 
-const https = require('https');
-const Fighters = require('../fighters.js');
 const { API_KEY, ANTON_CHAT_ID, ANTON_USER_ID, ANDREY_CHAT_ID, ANDREY_USER_ID  } = process.env
 const currentSeason = new Date().getFullYear();
 const league = 'UFC';
-const mongoose = require('mongoose');
 const User = require('../models/user.model.ts');
 const Bet = require('../models/bet.model.ts');
 const ObjectId = require('mongoose').Types.ObjectId;
