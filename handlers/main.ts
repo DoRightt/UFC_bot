@@ -12,7 +12,7 @@ import Fighters from "../fighters.js"
 
 dotenv.config();
 
-const { API_KEY, ANTON_CHAT_ID, ANTON_USER_ID, ANDREY_CHAT_ID, ANDREY_USER_ID  } = process.env
+const { API_KEY, ANTON_CHAT_ID, ANTON_USER_ID, ANDREY_CHAT_ID, ANDREY_USER_ID, PLAYER_ONE_NAME, PLAYER_TWO_NAME } = process.env
 const currentSeason = new Date().getFullYear();
 const league = 'UFC';
 const User = require('../models/user.model.ts');
@@ -404,7 +404,7 @@ const getSeasonScores = async (): Promise<string> => {
         }
     }
 
-    return `Андрей ${andreyScores} - ${antonScores} Антон`
+    return `${PLAYER_TWO_NAME} ${andreyScores} - ${antonScores} ${PLAYER_ONE_NAME}`
 }
 
 const setBetResult = async (bet) => {
@@ -456,8 +456,8 @@ const getNextEventBets = async (): Promise<string> => {
 
     const parsedBets = fightBets.map((bet, index) => {
         return `${index + 1}. Бой: ${bet.name}\n` +
-            `Антон поставил на: ${bet.antonFighterName}\n` +
-            `Андрей поставил на: ${bet.andreyFighterName}\n`
+            `${PLAYER_ONE_NAME} поставил на: ${bet.antonFighterName}\n` +
+            `${PLAYER_TWO_NAME} поставил на: ${bet.andreyFighterName}\n`
     })
 
     return parsedBets.join('\n') || 'На следующий турнир ставки отстутствуют или совпадают.'

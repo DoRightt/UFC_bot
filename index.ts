@@ -22,7 +22,7 @@ dotenv.config();
 
 process.env.NTBA_FIX_319 = String(1);
 
-const { TELEGRAM_TOKEN, ANTON_CHAT_ID, ANDREY_CHAT_ID  } = process.env;
+const { TELEGRAM_TOKEN, ANTON_CHAT_ID, ANDREY_CHAT_ID, PLAYER_ONE_NAME, PLAYER_TWO_NAME   } = process.env;
 const bot = new TelegramBot(TELEGRAM_TOKEN, {polling: true});
 const url = dbPath;
 
@@ -84,7 +84,7 @@ bot.on('callback_query', async (query) => {
             const betData = JSON.parse(option.substring(1));
             betHandler(betData, chatId).then(res => {
                 const opponentChatId = Number(chatId) === Number(ANTON_CHAT_ID) ? ANDREY_CHAT_ID : ANTON_CHAT_ID;
-                const userName = Number(chatId) === Number(ANTON_CHAT_ID) ? 'Антон' : 'Андрей';
+                const userName = Number(chatId) === Number(ANTON_CHAT_ID) ? PLAYER_ONE_NAME : PLAYER_TWO_NAME;
                 bot.sendMessage(chatId, res.mainMessage);
                 if (res.opponentMessage) {
                     const message = `${userName} ${res.opponentMessage}`;
