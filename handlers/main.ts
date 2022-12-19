@@ -10,19 +10,15 @@ import { States } from "../models/states.enum";
 import https from "https";
 import Fighters from "../fighters.js"
 
+import User from "../models/user.model";
+import Bet from "../models/bet.model";
+
 dotenv.config();
 
 const { API_KEY, ANTON_CHAT_ID, ANTON_USER_ID, ANDREY_CHAT_ID, ANDREY_USER_ID, PLAYER_ONE_NAME, PLAYER_TWO_NAME } = process.env
 const currentSeason = new Date().getFullYear();
 const league = 'UFC';
-const User = require('../models/user.model.ts');
-const Bet = require('../models/bet.model.ts');
 const ObjectId = require('mongoose').Types.ObjectId;
-
-const defaultScores = {
-    ANTON: 4,
-    ANDREY: 6
-}
 
 const getFighterStat = (name: string): Fighter => {
     const [firstName, secondName] = name.split(' ');
@@ -246,7 +242,7 @@ const betHandler = async (options, chatId) => {
 }
 
 const getUsers = async (filter: any = {}) => {
-    return User.find(filter, (err, res) => {
+    return User.find(filter, (err, res: any ) => {
         if (err) {
             res.status(500).send(`Error: ${err.message}`);
             return null;
@@ -263,7 +259,7 @@ const getCurrentUser = async (chatId: string | number) => {
 }
 
 const getBets = async (filter: any = {}) => {
-    return Bet.find(filter, (err, res) => {
+    return Bet.find(filter, (err, res: any) => {
         if (err) {
             res.status(500).send(`Error: ${err.message}`);
             return null;
@@ -326,7 +322,7 @@ const makeBet = async (bet: IBet): Promise<any> => {
                             mainMessage: `Ты уже делал ставку на ${fighterName} этом бою`
                         });
                     } else {
-                        const myBet = bets[0];
+                        const myBet = bets[0] as BetModel;
                         Bet.updateOne(myBet, { bet: fighterId }).then(() => {
 
                             console.log(`Ставка была изменена на ${fighterName}`);
@@ -391,8 +387,8 @@ const getSeasonScores = async (): Promise<string> => {
     const validBets = updatedBets.filter(bet => fightIdsOfValidBets.includes(bet.fightId));
     const successValidBets = validBets.filter(bet => bet.isWin);
 
-    let antonScores = defaultScores.ANTON;
-    let andreyScores = defaultScores.ANDREY;
+    let antonScores = 0;
+    let andreyScores = 0;
 
     for (let bet of successValidBets) {
         if (bet.userId.toString() === ANTON_USER_ID) {

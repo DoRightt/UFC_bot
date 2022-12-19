@@ -21,4 +21,13 @@ const userSchema = new Schema({
     bets: Array
 }, {collection: 'users'})
 
-module.exports = model('User', userSchema);
+interface IUser {
+    id?: number,
+    name: string,
+    password: string,
+    bets: BetModel[]
+}
+
+const User = model<IUser>('User', userSchema);
+
+export default User;

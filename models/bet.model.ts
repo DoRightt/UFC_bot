@@ -46,13 +46,17 @@ const betSchema = new Schema({
         default: false
     }
 
-}, {collection: 'bets'})
+}, {collection: 'bets'});
 
 export interface IBet {
     fightId: string;
     userId: string;
     eventId: string;
     bet: string;
+    isFightFinished?: boolean;
+    isWin?: boolean;
 }
 
-module.exports = model('Bet', betSchema);
+const Bet = model<IBet>('Bet', betSchema);
+
+export default Bet;
